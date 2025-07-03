@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Matching Game</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 100px);
+            grid-gap: 10px;
+            margin-top: 20px;
+        }
+
+        .card {
+            width: 100px;
+            height: 100px;
+            background-color: #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.5s;
+        }
+
+        .card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Card Matching Game</h1>
+    <div id="game-board" class="game-board"></div>
+    <div id="leaderboard" class="leaderboard">
+        <h2>Leaderboard</h2>
+        <ol id="scores"></ol>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardArray = [
+                { name: 'apple', img: '🍎' },
+                { name: 'banana', img: '🍌' },
+                { name: 'cherry', img: '🍒' },
+                { name: 'grape', img: '🍇' },
+                { name: 'lemon', img: '🍋' },
+                { name: 'orange', img: '🍊' },
+                { name: 'watermelon', img: '🍉' },
+                { name: 'strawberry', img: '🍓' },
+                { name: 'apple', img: '🍎' },
+                { name: 'banana', img: '🍌' },
+                { name: 'cherry', img: '🍒' },
+                { name: 'grape', img: '🍇' },
+                { name: 'lemon', img: '🍋' },
+                { name: 'orange', img: '🍊' },
+                { name: 'watermelon', img: '🍉' },
+                { name: 'strawberry', img: '🍓' }
+            ];
+
+            cardArray.sort(() => 0.5 - Math.random());
+
+            const board = document.getElementById('game-board');
+            const scoresList = document.getElementById('scores');
+            let cardsChosen = [];
+            let cardsChosenId = [];
+            let cardsWon = [];
+
+            function createBoard() {
+                cardArray.forEach((card, index) => {
+                    const cardElement = document.createElement('div');
+                    cardElement.setAttribute('class', 'card');
+                    cardElement.setAttribute('data-id', index);
+                    cardElement.addEventListener('click', flipCard);
+                    board.appendChild(cardElement);
+                });
+            }
+
+            function flipCard() {
+                const cardId = this.getAttribute('data-id');
+                cardsChosen.push(cardArray[cardId].name);
+                cardsChosenId.push(cardId);
+                this.innerHTML = cardArray[cardId].img;
+                this.classList.add('flip');
+                if (cardsChosen.length === 2) {
+                    setTimeout(checkForMatch, 500);
+                }
+            }
+
+            function checkForMatch() {
+                const cards = document.querySelectorAll('.card');
+                const [optionOneId, optionTwoId] = cardsChosenId;
+                if (cardsChosen[0] === cardsChosen[1] && optionOneId !== optionTwoId) {
+                    alert('You found a match!');
+                    cards[optionOneId].removeEventListener('click', flipCard);
+                    cards[optionTwoId].removeEventListener('click', flipCard);
+                    cardsWon.push(cardsChosen);
+                } else {
+                    cards[optionOneId].innerHTML = '';
+                    cards[optionTwoId].innerHTML = '';
+                    cards[optionOneId].classList.remove('flip');
+                    cards[optionTwoId].classList.remove('flip');
+                }
+                cardsChosen = [];
+                cardsChosenId = [];
+                if (cardsWon.length === cardArray.length / 2) {
+                    alert('Congratulations! You found all matches.');
+                    updateLeaderboard();
+                }
+            }
+
+            function updateLeaderboard() {
+                const score = cardsWon.length;
+                const scoreElement = document.createElement('li');
+                scoreElement.textContent = `Score: ${score}`;
+                scoresList.appendChild(scoreElement);
+            }
+
+            createBoard();
+        });
+    </script>
+</body>
+</html>
